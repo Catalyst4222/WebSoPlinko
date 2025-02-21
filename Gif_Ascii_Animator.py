@@ -13,7 +13,6 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import time
 import sys
-from pygame import mixer #you will need pygame in order to play the music, just a FYI
 
 # extracts the frames from the animated gif, 
 # takes in an allready open gif and returns an list of new image objects, one for each
@@ -117,13 +116,6 @@ def animate_ascii(ascii_frames, frame_pause=.02, num_iterations=15, clear_prev_f
  
 
 
-#this function takes in the file name of a song and uses pygame to play it,
-#ok, admittedly it's not the best solution, but I had the libraries allready installed
-#and it was a quick way to get music into the project. 
-def start_music(musicFileName):
-    mixer.init()
-    mixer.music.load(musicFileName)
-    mixer.music.play()
     
 intensity_multiplier = 4    
 

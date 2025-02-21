@@ -7,6 +7,7 @@ from Gif_Ascii_Animator import extract_gif_frames, convert_frames_to_ascii
 
 app = FastAPI()
 
+# At some point, figure out how to avoid sending newlines in favor of something else
 newline = "\033[1E"
 clear = "\033[2J"
 
@@ -19,14 +20,8 @@ plinko = r"""
 \_| |_/\___/\_| \_|\____/\____/  \_|   \_____/\___/\_| \_/\_| \_/\___/ 
 """
 
+frames = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko.gif")), scale=2)
 
-old_frames = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko.gif")), scale=2)
-frames = []
-# for frame in old_frames:
-#     frame: str
-#     frames.append(newline.join(frame.split("\n")))
-frames = old_frames
-    
 
 # A list to store all active WebSocket connections
 connected_clients: List[WebSocket] = []
@@ -38,14 +33,11 @@ async def broadcast_message():
     
     while True:
         
-        print(clear, end="")
-        
         # Broadcast message to all clients
         message = "This is a broadcast message!"
         for websocket in connected_clients:
             try:
                 await websocket.send_text(plinko + "\n" + frames[frame_index])
-                print(frames[frame_index])
             except WebSocketDisconnect:
                 # Remove clients that are no longer connected
                 connected_clients.remove(websocket)
@@ -62,10 +54,11 @@ async def startup():
     """Start the background broadcast task when the server starts"""
     asyncio.create_task(broadcast_message())
 
-@app.websocket("/ws")
+@app.websocket("/")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for clients to connect"""
     await websocket.accept()
+    print("Client connected")
     connected_clients.append(websocket)
 
     try:
