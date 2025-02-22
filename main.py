@@ -20,8 +20,8 @@ plinko = r"""
 \_| |_/\___/\_| \_|\____/\____/  \_|   \_____/\___/\_| \_/\_| \_/\___/ 
 """
 
-frames = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko-borderless.gif")), scale=2.25)
-
+frames_big = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko.gif")), scale=6.75)
+frames_small = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko-borderless.gif")), scale=2.25)
 
 # A list to store all active WebSocket connections
 connected_clients: List[WebSocket] = []
@@ -37,13 +37,18 @@ async def broadcast_message():
         message = "This is a broadcast message!"
         for websocket in connected_clients:
             try:
-                await websocket.send_text(plinko + "\n" + frames[frame_index])
+                print(websocket.scope["path"])
+                if (websocket.scope["path"] == "/small"):
+                    await websocket.send_text(plinko + "\n" + frames_small[frame_index])    
+                else:
+                    await websocket.send_text(frames_big[frame_index])
+                
             except WebSocketDisconnect:
                 # Remove clients that are no longer connected
                 connected_clients.remove(websocket)
                 
         frame_index += 1
-        if frame_index >= len(frames):
+        if frame_index >= len(frames_big):
             frame_index = 0
         
         
@@ -56,6 +61,21 @@ async def startup():
 
 @app.websocket("/")
 async def websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for clients to connect"""
+    await websocket.accept()
+    print("Client connected")
+    connected_clients.append(websocket)
+
+    try:
+        while True:
+            # Keep the connection open to receive messages (if needed)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        connected_clients.remove(websocket)
+        print("Client disconnected")
+
+@app.websocket("/small")
+async def websocket_endpoint_small(websocket: WebSocket):
     """WebSocket endpoint for clients to connect"""
     await websocket.accept()
     print("Client connected")
