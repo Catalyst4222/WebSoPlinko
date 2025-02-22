@@ -20,7 +20,7 @@ plinko = r"""
 \_| |_/\___/\_| \_|\____/\____/  \_|   \_____/\___/\_| \_/\_| \_/\___/ 
 """
 
-frames = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko.gif")), scale=2)
+frames = convert_frames_to_ascii(extract_gif_frames(Image.open("horse-plinko-borderless.gif")), scale=2.25)
 
 
 # A list to store all active WebSocket connections
