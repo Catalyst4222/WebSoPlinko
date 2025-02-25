@@ -29,7 +29,8 @@ connected_clients: List[WebSocket] = []
 
 async def broadcast_message():
     """Function to broadcast a message to all connected WebSockets every second"""
-    frame_index = 0
+    frame_index_small = 0
+    frame_index_big = 0
     
     while True:
         
@@ -39,17 +40,21 @@ async def broadcast_message():
             try:
                 print(websocket.scope["path"])
                 if (websocket.scope["path"] == "/small"):
-                    await websocket.send_text(plinko + "\n" + frames_small[frame_index])    
+                    await websocket.send_text(plinko + "\n" + frames_small[frame_index_small])    
                 else:
-                    await websocket.send_text(frames_big[frame_index])
+                    await websocket.send_text(frames_big[frame_index_big])
                 
             except WebSocketDisconnect:
                 # Remove clients that are no longer connected
                 connected_clients.remove(websocket)
                 
-        frame_index += 1
-        if frame_index >= len(frames_big):
-            frame_index = 0
+        frame_index_small += 1
+        frame_index_big += 1
+        
+        if frame_index_big >= len(frames_big):
+            frame_index_big = 0
+        if frame_index_small >= len(frames_small):
+            frame_index_small = 0
         
         
         await asyncio.sleep(.15)  # Sleep for 1 second before broadcasting again
